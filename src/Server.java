@@ -10,23 +10,29 @@ import java.util.concurrent.Executors;
 
 public class Server implements Runnable {
 	
+	private final int PORT;
 	private ArrayList<ConnectionHandler> connections;
 	private ServerSocket server;
 	private boolean shouldRun;
 	private Executor pool;
 	
-	public Server() {
+	public Server(int port) {
+		PORT = port;
 		connections = new ArrayList<>();
 		shouldRun = true;
+	}
+	
+	public Server() {
+		this(10666);
 	}
 	
 	@Override
 	public void run() {
 		try {
 			pool = Executors.newCachedThreadPool();
-			server = new ServerSocket(10666);
+			server = new ServerSocket(PORT);
 			
-			System.out.println("Server started on port " + server.getLocalPort());
+			System.out.println("Server started on port " + PORT);
 			
 			while(shouldRun) {
 				Socket client = server.accept();
