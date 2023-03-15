@@ -35,13 +35,14 @@ public class ChatServer {
 
         while (true) {
             try {
-                // Warte auf Client
-                Socket neueClientSocket = serverSocket.accept();
-                // Wenn verbunden, starte einen ClientThread
-                var neuerClient = new ChatServerClientThread(this,
-                        neueClientSocket);
-                clientThreads.add(neuerClient);
-                neuerClient.start();
+                // wait for client
+                Socket newClientSocket = serverSocket.accept();
+                
+                // when connected, start ClientThread
+                var newClient = new ChatServerClientThread(this, newClientSocket);
+                clientThreads.add(newClient);
+                newClient.start();
+                
                 System.out.println("Client Nr. " + clientThreads.size() + " connected!");
             } catch (IOException e) {
                 System.err.println("Error while connecting to client.");
@@ -50,8 +51,8 @@ public class ChatServer {
     }
 
     public void sendToAll(ChatServerClientThread client, String message) {
-        for (var empfaenger: clientThreads) {
-            empfaenger.sende(client.getName() + ": " + message);
+        for (var receiver: clientThreads) {
+            receiver.send(client.getName() + ": " + message);
         }
     }
     

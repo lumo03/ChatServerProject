@@ -5,14 +5,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-/**
- * 
- */
-
-/**
- * @author Luis Moncada
- *
- */
 public class ChatServerClientThread extends Thread {
     private ChatServer server;
     private Socket clientSocket;
@@ -37,28 +29,28 @@ public class ChatServerClientThread extends Thread {
         }
     }
 
-    public void sende(String botschaft) {
-        writer.println(botschaft);
+    public void send(String message) {
+        writer.println(message);
         writer.flush();
     }
 
     @Override
     public void run() {
-        String empfangen;
-        System.out.println("Started ClientThread with: " + name);
-        writer.println("Welcome to Chat-Server! Type `QUIT` to quit. ");
+        String received;
+        System.out.println("ClientThread started with: " + name);
+        writer.println("Welcome to Chat-Server! Type `QUIT` to quit.");
         writer.flush();
 
         while (true) {
             try {
-                empfangen = reader.readLine();
-                System.out.println(name + ": " + empfangen);
+                received = reader.readLine();
+                System.out.println(name + ": " + received);
 
-                if (empfangen == null || empfangen.equalsIgnoreCase("QUIT")) {
+                if (received == null || received.equalsIgnoreCase("QUIT")) {
                     break;
                 }
 
-                server.sendToAll(this, empfangen);
+                server.sendToAll(this, received);
             } catch (IOException e) {
                 System.err.println("Error while receiving: Client has closed the connection.");
                 break;
@@ -72,6 +64,6 @@ public class ChatServerClientThread extends Thread {
             // Ignore silently
         }
 
-        System.out.println("ClientThread closed: " + name);
+        System.out.println("Closed ClientThread: " + name);
     }
 }
