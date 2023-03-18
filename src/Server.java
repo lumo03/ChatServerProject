@@ -39,7 +39,7 @@ public class Server implements Runnable {
 			
 			while(shouldRun) {
 				Socket client = server.accept();
-				ConnectionHandler handler = new ConnectionHandler(this, client);
+				ConnectionHandler handler = new ConnectionHandler(this, client, connections.size() + 1);
 				connections.add(handler);
 				pool.execute(handler);
 			}
@@ -63,45 +63,45 @@ public class Server implements Runnable {
 		String retMsg = "";
 		
 		if (msgType == Operations.CMD_QUIT) {
-			sysMsg = String.format("%s closed the connection.", clientH.getNickname());
-			pubMsg = String.format("%s left the chat.", clientH.getNickname());
+			sysMsg = String.format("%s closed the connection.", clientH.getUsername());
+			pubMsg = String.format("%s left the chat.", clientH.getUsername());
 			retMsg = "You left the chat.";
 		} else if (msgType == Operations.CMD_RENAME) {
 			if (optionalData.size() > 0) {
-				sysMsg = String.format("%s changed their nickname to '%s'.", clientH.getNickname(), optionalData.get(0));
-				pubMsg = String.format("%s changed their nickname to '%s'.", clientH.getNickname(), optionalData.get(0));
-				retMsg = String.format("Your nickname was successfully changed to '%s'.", optionalData.get(0));
+				sysMsg = String.format("%s changed their username to '%s'.", clientH.getUsername(), optionalData.get(0));
+				pubMsg = String.format("%s changed their username to '%s'.", clientH.getUsername(), optionalData.get(0));
+				retMsg = String.format("Your username was successfully changed to '%s'.", optionalData.get(0));
 			} else {
-				sysMsg = String.format("%s changed their nickname.", clientH.getNickname());
-				pubMsg = String.format("%s changed their nickname.", clientH.getNickname());
-				retMsg = "Your nickname was successfully changed.";
+				sysMsg = String.format("%s changed their username.", clientH.getUsername());
+				pubMsg = String.format("%s changed their username.", clientH.getUsername());
+				retMsg = "Your username was successfully changed.";
 			}
 		} else if (msgType == Operations.TEXT) {
 			if (optionalData.size() > 0) {
-				sysMsg = String.format("%s: %s", clientH.getNickname(), optionalData.get(0));
-				pubMsg = String.format("%s: %s", clientH.getNickname(), optionalData.get(0));
+				sysMsg = String.format("%s: %s", clientH.getUsername(), optionalData.get(0));
+				pubMsg = String.format("%s: %s", clientH.getUsername(), optionalData.get(0));
 				retMsg = String.format("YOU: %s", optionalData.get(0));
 			} else {
-				sysMsg = String.format("%s sent a message.", clientH.getNickname());
-				pubMsg = String.format("%s sent a message.", clientH.getNickname());
+				sysMsg = String.format("%s sent a message.", clientH.getUsername());
+				pubMsg = String.format("%s sent a message.", clientH.getUsername());
 				retMsg = "Your message was sent.";
 			}
 		} else if (msgType == Operations.CMD_JOIN) {
-			sysMsg = String.format("%s connected.", clientH.getNickname());
-			pubMsg = String.format("%s joined the chat.", clientH.getNickname());
-			retMsg = "You are now connected.";
+			sysMsg = String.format("%s connected.", clientH.getUsername());
+			pubMsg = String.format("%s joined the chat.", clientH.getUsername());
+			retMsg = String.format("You (%s) are now connected.", clientH.getUsername());
 		} else if (msgType == Operations.CMD_ORDER) {
 			shoppingCart.addAll(optionalData);
 			String items = String.join(", ", optionalData);
-			sysMsg = String.format("%s ordered: %s", clientH.getNickname(), items);
-			pubMsg = String.format("%s ordered: %s", clientH.getNickname(), items);
+			sysMsg = String.format("%s ordered: %s", clientH.getUsername(), items);
+			pubMsg = String.format("%s ordered: %s", clientH.getUsername(), items);
 			retMsg = String.format("You ordered: %s%nShopping Cart: %s", items, shoppingCart);
 		}
 		
 		System.out.println(sysMsg);
 		
 		for (ConnectionHandler ch : connections) {
-			if (ch != null && ch.getNickname() != clientH.getNickname()) {
+			if (ch != null && ch.getUsername() != clientH.getUsername()) {
 				ch.sendMessage(pubMsg);
 			}
 		}
@@ -114,11 +114,11 @@ public class Server implements Runnable {
 	}
 	
 	public void reportError(ConnectionHandler user, Operations operation, List<String> optionalData) {
-		System.out.printf("Error at user '%s' while executing operation '%s'.", user.getNickname(), operation);
+		System.out.printf("Error at user '%s' while executing operation '%s'.", user.getUsername(), operation);
 		if (optionalData.size() > 0) {
 			System.out.printf("Additional information: %s%n", optionalData);
 		}
-		user.sendMessage(String.format("Error while trying to %s. Please try again later.%n", operation));
+		user.sendMessage(String.format("Error while trying to %s. Please try again later.", operation));
 	}
 	
 	public void reportError(ConnectionHandler user, Operations operation) {
