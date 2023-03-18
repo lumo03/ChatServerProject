@@ -1,6 +1,6 @@
 package types;
 
-public enum Operations {
+public enum Operation {
 	TEXT, CMD_RENAME, CMD_QUIT, CMD_JOIN, CMD_ORDER;
 	
 	@Override

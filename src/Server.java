@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import types.Operations;
+import types.Operation;
 
 public class Server implements Runnable {
 	
@@ -57,16 +57,16 @@ public class Server implements Runnable {
 		}
 	}
 	
-	public void broadcast(ConnectionHandler clientH, Operations msgType, List<String> optionalData) {
+	public void broadcast(ConnectionHandler clientH, Operation msgType, List<String> optionalData) {
 		String sysMsg = "";
 		String pubMsg = "";
 		String retMsg = "";
 		
-		if (msgType == Operations.CMD_QUIT) {
+		if (msgType == Operation.CMD_QUIT) {
 			sysMsg = String.format("%s closed the connection.", clientH.getUsername());
 			pubMsg = String.format("%s left the chat.", clientH.getUsername());
 			retMsg = "You left the chat.";
-		} else if (msgType == Operations.CMD_RENAME) {
+		} else if (msgType == Operation.CMD_RENAME) {
 			if (optionalData.size() > 0) {
 				sysMsg = String.format("%s changed their username to '%s'.", clientH.getUsername(), optionalData.get(0));
 				pubMsg = String.format("%s changed their username to '%s'.", clientH.getUsername(), optionalData.get(0));
@@ -76,7 +76,7 @@ public class Server implements Runnable {
 				pubMsg = String.format("%s changed their username.", clientH.getUsername());
 				retMsg = "Your username was successfully changed.";
 			}
-		} else if (msgType == Operations.TEXT) {
+		} else if (msgType == Operation.TEXT) {
 			if (optionalData.size() > 0) {
 				sysMsg = String.format("%s: %s", clientH.getUsername(), optionalData.get(0));
 				pubMsg = String.format("%s: %s", clientH.getUsername(), optionalData.get(0));
@@ -86,11 +86,11 @@ public class Server implements Runnable {
 				pubMsg = String.format("%s sent a message.", clientH.getUsername());
 				retMsg = "Your message was sent.";
 			}
-		} else if (msgType == Operations.CMD_JOIN) {
+		} else if (msgType == Operation.CMD_JOIN) {
 			sysMsg = String.format("%s connected.", clientH.getUsername());
 			pubMsg = String.format("%s joined the chat.", clientH.getUsername());
 			retMsg = String.format("You (%s) are now connected.", clientH.getUsername());
-		} else if (msgType == Operations.CMD_ORDER) {
+		} else if (msgType == Operation.CMD_ORDER) {
 			shoppingCart.addAll(optionalData);
 			String items = String.join(", ", optionalData);
 			sysMsg = String.format("%s ordered: %s", clientH.getUsername(), items);
@@ -109,11 +109,11 @@ public class Server implements Runnable {
 		clientH.sendMessage(retMsg);
 	}
 	
-	public void broadcast(ConnectionHandler clientH, Operations msgType) {
+	public void broadcast(ConnectionHandler clientH, Operation msgType) {
 		broadcast(clientH, msgType, List.of());
 	}
 	
-	public void reportError(ConnectionHandler user, Operations operation, List<String> optionalData) {
+	public void reportError(ConnectionHandler user, Operation operation, List<String> optionalData) {
 		System.out.printf("Error at user '%s' while executing operation '%s'.", user.getUsername(), operation);
 		if (optionalData.size() > 0) {
 			System.out.printf("Additional information: %s%n", optionalData);
@@ -121,7 +121,7 @@ public class Server implements Runnable {
 		user.sendMessage(String.format("Error while trying to %s. Please try again later.", operation));
 	}
 	
-	public void reportError(ConnectionHandler user, Operations operation) {
+	public void reportError(ConnectionHandler user, Operation operation) {
 		reportError(user, operation, List.of());
 	}
 	

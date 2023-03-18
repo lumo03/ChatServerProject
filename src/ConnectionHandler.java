@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import types.Operations;
+import types.Operation;
 
 class ConnectionHandler implements Runnable {
 	
@@ -42,32 +42,32 @@ class ConnectionHandler implements Runnable {
 				System.out.println("username changed, length: "+input.length());
 				username = input;
 			}
-			server.broadcast(this, Operations.CMD_JOIN);
+			server.broadcast(this, Operation.CMD_JOIN);
 			String message;
 			
 			while((message = in.readLine()) != null) {
 				if (message.toUpperCase().startsWith("/QUIT")) {
-					server.broadcast(this, Operations.CMD_QUIT, List.of(username));
+					server.broadcast(this, Operation.CMD_QUIT, List.of(username));
 					shutdown();
 				} else if (message.toUpperCase().startsWith("/RENAME ")) {
 					String[] usernameSplit = message.split(" ", 2);
 					if (usernameSplit.length == 2) {
-						server.broadcast(this, Operations.CMD_RENAME, List.of(usernameSplit[1]));
+						server.broadcast(this, Operation.CMD_RENAME, List.of(usernameSplit[1]));
 						username = usernameSplit[1];
 					} else {
-						server.reportError(this, Operations.CMD_RENAME);
+						server.reportError(this, Operation.CMD_RENAME);
 					}
 				} else if (message.toUpperCase().startsWith("/ADD ")) {
 					List<String> orderSplit = Arrays.stream(message.toUpperCase().split(" "))
                             .filter(w -> server.isOrderItem(w))
                             .collect(Collectors.toList());
 					if (orderSplit.size() > 0) {
-						server.broadcast(this, Operations.CMD_ORDER, orderSplit);
+						server.broadcast(this, Operation.CMD_ORDER, orderSplit);
 					} else {
-						server.reportError(this, Operations.CMD_ORDER);
+						server.reportError(this, Operation.CMD_ORDER);
 					}
 				} else {
-					server.broadcast(this, Operations.TEXT, List.of(message));
+					server.broadcast(this, Operation.TEXT, List.of(message));
 				}
 			}
 			
@@ -89,7 +89,7 @@ class ConnectionHandler implements Runnable {
 			in.close();
 			out.close();
 			if(client.isClosed()) {
-				server.broadcast(this, Operations.CMD_QUIT);
+				server.broadcast(this, Operation.CMD_QUIT);
 				client.close();
 			}
 		} catch (IOException e) {
