@@ -1,36 +1,12 @@
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-enum Operations {
-	TEXT, CMD_RENAME, CMD_QUIT, CMD_JOIN, CMD_ORDER;
-	
-	@Override
-	public String toString() {
-		switch (this) {
-			case TEXT:
-				return "Text";
-			case CMD_RENAME:
-				return "Rename";
-			case CMD_QUIT:
-				return "Quit";
-			case CMD_JOIN:
-				return "Join";
-			case CMD_ORDER:
-				return "Order";
-			default:
-				throw new IllegalArgumentException();
-		}
-	}
-}
+import types.Operations;
 
 public class Server implements Runnable {
 	
@@ -63,7 +39,7 @@ public class Server implements Runnable {
 			
 			while(shouldRun) {
 				Socket client = server.accept();
-				ConnectionHandler handler = new ConnectionHandler(client);
+				ConnectionHandler handler = new ConnectionHandler(this, client);
 				connections.add(handler);
 				pool.execute(handler);
 			}
@@ -142,7 +118,7 @@ public class Server implements Runnable {
 		if (optionalData.size() > 0) {
 			System.out.printf("Additional information: %s%n", optionalData);
 		}
-		user.out.printf("Error while trying to %s. Please try again later.%n", operation);
+		user.sendMessage(String.format("Error while trying to %s. Please try again later.%n", operation));
 	}
 	
 	public void reportError(ConnectionHandler user, Operations operation) {
@@ -169,82 +145,6 @@ public class Server implements Runnable {
 		return ORDER_ITEMS.contains(s.toUpperCase());
 	}
 	
-	
-	class ConnectionHandler implements Runnable {
-		
-		private Socket client;
-		private BufferedReader in;
-		private PrintWriter out;
-		private String nickname;
-		
-		public ConnectionHandler(Socket client) {
-			this.client = client;
-		}
-
-		@Override
-		public void run() {
-			try {
-				in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-				out = new PrintWriter(client.getOutputStream(), true);
-				out.println("Welcome to the Chat-Server!");
-				out.flush();
-				out.print("Provide a nickname: ");
-				out.flush();
-				nickname = in.readLine();
-				broadcast(this, Operations.CMD_JOIN);
-				String message;
-				
-				while((message = in.readLine()) != null) {
-					if (message.toUpperCase().startsWith("/QUIT")) {
-						broadcast(this, Operations.CMD_QUIT, List.of(nickname));
-						shutdown();
-					} else if (message.toUpperCase().startsWith("/NICKNAME ")) {
-						String[] nicknameSplit = message.split(" ", 2);
-						if (nicknameSplit.length == 2) {
-							broadcast(this, Operations.CMD_RENAME, List.of(nicknameSplit[1]));
-							nickname = nicknameSplit[1];
-						} else {
-							reportError(this, Operations.CMD_RENAME);
-						}
-					} else if (message.toUpperCase().startsWith("/ADD ")) {
-						List<String> orderSplit = Arrays.asList(message.toUpperCase().split(" "));
-						orderSplit = orderSplit.stream().filter(w -> isOrderItem(w)).toList();
-						if (orderSplit.size() > 0) {
-							broadcast(this, Operations.CMD_ORDER, orderSplit);
-						} else {
-							reportError(this, Operations.CMD_ORDER);
-						}
-					} else {
-						broadcast(this, Operations.TEXT, List.of(message));
-					}
-				}
-				
-			} catch(IOException e) {
-				shutdown();
-			}
-		}
-		
-		public void sendMessage(String message) {
-			out.println(message); 
-		}
-		
-		public String getNickname() {
-			return nickname;
-		}
-		
-		public void shutdown() {
-			try {
-				in.close();
-				out.close();
-				if(client.isClosed()) {
-					client.close();
-				}
-			} catch (IOException e) {
-				// ignore
-			}
-		}
-		
-	}
 	
 	public static void main(String[] args) {
 		Server server = new Server();
