@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import types.ChatState;
 import types.Operation;
 
 public class Server implements Runnable {
-	
+
 	private final int PORT;
 	private ArrayList<ConnectionHandler> connections;
 	private ServerSocket server;
@@ -17,26 +18,30 @@ public class Server implements Runnable {
 	private Executor pool;
 	public final static List<String> ORDER_ITEMS = List.of("BURGER", "FRIES", "KETCHUP");
 	private List<String> shoppingCart;
-	
+	private ChatState chatState;
+	private List<ConnectionHandler> orderParticipants;
+
 	public Server(int port) {
 		PORT = port;
 		connections = new ArrayList<>();
 		shouldRun = true;
 		shoppingCart = new ArrayList<>();
+		chatState = ChatState.CHATTING;
+		orderParticipants = new ArrayList<>();
 	}
-	
+
 	public Server() {
 		this(10666);
 	}
-	
+
 	@Override
 	public void run() {
 		try {
 			pool = Executors.newCachedThreadPool();
 			server = new ServerSocket(PORT);
-			
+
 			System.out.println("Server started on port " + PORT);
-			
+
 			while(shouldRun) {
 				Socket client = server.accept();
 				ConnectionHandler handler = new ConnectionHandler(this, client, connections.size() + 1);
@@ -47,7 +52,15 @@ public class Server implements Runnable {
 			shutdown();
 		}
 	}
-	
+
+	public ChatState getChatState() {
+		return chatState;
+	}
+
+	public void setChatState(ChatState chatState) {
+		this.chatState = chatState;
+	}
+
 	@Deprecated
 	public void broadcast(String message) {
 		for(ConnectionHandler ch : connections) {
@@ -57,11 +70,14 @@ public class Server implements Runnable {
 		}
 	}
 	
+	/*
+	 * clientH must not be null
+	 */
 	public void broadcast(ConnectionHandler clientH, Operation msgType, List<String> optionalData) {
 		String sysMsg = "";
 		String pubMsg = "";
 		String retMsg = "";
-		
+
 		if (msgType == Operation.CMD_QUIT) {
 			sysMsg = String.format("%s closed the connection.", clientH.getUsername());
 			pubMsg = String.format("%s left the chat.", clientH.getUsername());
@@ -90,16 +106,24 @@ public class Server implements Runnable {
 			sysMsg = String.format("%s connected.", clientH.getUsername());
 			pubMsg = String.format("%s joined the chat.", clientH.getUsername());
 			retMsg = String.format("You (%s) are now connected.", clientH.getUsername());
-		} else if (msgType == Operation.CMD_ORDER) {
+		} else if (msgType == Operation.CMD_ADD_TO_ORDER) {
 			shoppingCart.addAll(optionalData);
-			String items = String.join(", ", optionalData);
+			String items = Utils.joinWithComma(optionalData);
 			sysMsg = String.format("%s ordered: %s", clientH.getUsername(), items);
 			pubMsg = String.format("%s ordered: %s", clientH.getUsername(), items);
 			retMsg = String.format("You ordered: %s%nShopping Cart: %s", items, shoppingCart);
+		} else if (msgType == Operation.CMD_REQUEST_ORDER) {
+			sysMsg = String.format("%s requested an order.", clientH.getUsername());
+			pubMsg = String.format("%s requested an order. Enter the command \"/join\" to join the order.", clientH.getUsername());
+			retMsg = "Your order was requested. Waiting for others to join...";
+		} else if (msgType == Operation.START_ORDER) {
+			sysMsg = "The order was started. Waiting for order.";
+			pubMsg = "The order was started. You can now order with \\\"/add [item1] [item2]\\\".";
+			retMsg = "Your order was started. You can now order with \"/add [item1] [item2]\".";
 		}
-		
+
 		System.out.println(sysMsg);
-		
+
 		for (ConnectionHandler ch : connections) {
 			if (ch != null && ch.getUsername() != clientH.getUsername()) {
 				ch.sendMessage(pubMsg);
@@ -108,23 +132,45 @@ public class Server implements Runnable {
 		
 		clientH.sendMessage(retMsg);
 	}
-	
+
 	public void broadcast(ConnectionHandler clientH, Operation msgType) {
 		broadcast(clientH, msgType, List.of());
 	}
-	
+
 	public void reportError(ConnectionHandler user, Operation operation, List<String> optionalData) {
 		System.out.printf("Error at user '%s' while executing operation '%s'.", user.getUsername(), operation);
 		if (optionalData.size() > 0) {
 			System.out.printf("Additional information: %s%n", optionalData);
 		}
-		user.sendMessage(String.format("Error while trying to %s. Please try again later.", operation));
+		user.sendMessage(String.format("Error while trying to %s.", operation));
+		if (optionalData.size() > 0) {
+			user.sendMessage("Reason(s): " + Utils.joinWithComma(optionalData));
+		}
+		user.sendMessage("Please try again later.");
 	}
-	
+
 	public void reportError(ConnectionHandler user, Operation operation) {
 		reportError(user, operation, List.of());
 	}
 	
+	public void startOrder(ConnectionHandler user) {
+		System.out.println("ORDRHAHAHA");
+		new Thread(() -> {
+			orderParticipants.add(user);
+			broadcast(user, Operation.CMD_REQUEST_ORDER);
+			
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			broadcast(user, Operation.START_ORDER);
+			chatState = ChatState.TAKING_THE_ORDER;
+		}).start();
+	}
+
 	public void shutdown() {
 		try {
 			shouldRun = false;
@@ -140,12 +186,12 @@ public class Server implements Runnable {
 			// ignore
 		}
 	}
-	
+
 	public boolean isOrderItem(String s) {
 		return ORDER_ITEMS.contains(s.toUpperCase());
 	}
-	
-	
+
+
 	public static void main(String[] args) {
 		Server server = new Server();
 		server.run();

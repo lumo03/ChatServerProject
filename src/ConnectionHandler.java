@@ -7,16 +7,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import types.ChatState;
 import types.Operation;
 
 class ConnectionHandler implements Runnable {
-	
+
 	private final Server server;
 	private final Socket client;
 	private BufferedReader in;
 	private PrintWriter out;
 	private String username;
-	
+
 	public ConnectionHandler(Server server, Socket client, int id) {
 		this.server = server;
 		this.client = client;
@@ -44,7 +45,7 @@ class ConnectionHandler implements Runnable {
 			}
 			server.broadcast(this, Operation.CMD_JOIN);
 			String message;
-			
+
 			while((message = in.readLine()) != null) {
 				if (message.toUpperCase().startsWith("/QUIT")) {
 					server.broadcast(this, Operation.CMD_QUIT, List.of(username));
@@ -57,33 +58,43 @@ class ConnectionHandler implements Runnable {
 					} else {
 						server.reportError(this, Operation.CMD_RENAME);
 					}
-				} else if (message.toUpperCase().startsWith("/ADD ")) {
-					List<String> orderSplit = Arrays.stream(message.toUpperCase().split(" "))
-                            .filter(w -> server.isOrderItem(w))
-                            .collect(Collectors.toList());
-					if (orderSplit.size() > 0) {
-						server.broadcast(this, Operation.CMD_ORDER, orderSplit);
+				} else if (message.toUpperCase().startsWith("/START")) {;
+					if (server.getChatState() == ChatState.CHATTING) {
+						server.startOrder(this);
 					} else {
-						server.reportError(this, Operation.CMD_ORDER);
+						server.reportError(this, Operation.CMD_ADD_TO_ORDER, List.of("No order was started."));
+					}
+				} else if (message.toUpperCase().startsWith("/ADD ")) {
+					if (server.getChatState() == ChatState.TAKING_THE_ORDER) {
+						List<String> orderSplit = Arrays.stream(message.toUpperCase().split(" "))
+								.filter(w -> server.isOrderItem(w))
+								.collect(Collectors.toList());
+						if (orderSplit.size() > 0) {
+							server.broadcast(this, Operation.CMD_ADD_TO_ORDER, orderSplit);
+						} else {
+							server.reportError(this, Operation.CMD_ADD_TO_ORDER);
+						}
+					} else {
+						server.reportError(this, Operation.CMD_ADD_TO_ORDER, List.of("No order was started."));
 					}
 				} else {
 					server.broadcast(this, Operation.TEXT, List.of(message));
 				}
 			}
-			
+
 		} catch(IOException e) {
 			shutdown();
 		}
 	}
-	
+
 	public void sendMessage(String message) {
 		out.println(message); 
 	}
-	
+
 	public String getUsername() {
 		return username;
 	}
-	
+
 	public void shutdown() {
 		try {
 			in.close();
@@ -96,5 +107,5 @@ class ConnectionHandler implements Runnable {
 			// ignore
 		}
 	}
-	
+
 }
