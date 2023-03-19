@@ -1,4 +1,4 @@
-package types;
+package backend.types;
 
 @FunctionalInterface
 public interface ListFunction {

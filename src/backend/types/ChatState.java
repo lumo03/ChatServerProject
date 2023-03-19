@@ -1,4 +1,4 @@
-package types;
+package backend.types;
 
 public enum ChatState {
     CHATTING,

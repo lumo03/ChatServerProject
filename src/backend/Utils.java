@@ -1,4 +1,6 @@
-import types.ListFunction;
+package backend;
+
+import backend.types.ListFunction;
 
 import java.util.List;
 

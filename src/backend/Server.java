@@ -1,5 +1,7 @@
-import types.ChatState;
-import types.Operation;
+package backend;
+
+import backend.types.ChatState;
+import backend.types.Operation;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -50,7 +52,7 @@ public class Server implements Runnable {
             pool = Executors.newCachedThreadPool();
             server = new ServerSocket(PORT);
 
-            System.out.println("Server started on port " + PORT);
+            System.out.println("backend.Server started on port " + PORT);
 
             while (shouldRun) {
                 Socket client = server.accept();

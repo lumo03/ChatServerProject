@@ -1,5 +1,7 @@
-import types.ChatState;
-import types.Operation;
+package backend;
+
+import backend.types.ChatState;
+import backend.types.Operation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +31,7 @@ class ConnectionHandler implements Runnable {
         try {
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             out = new PrintWriter(client.getOutputStream(), true);
-            sendMessage("Welcome to the Order-Chat-Server!");
+            sendMessage("Welcome to the Order-Chat-backend.Server!");
             sendMessage("Type `/quit` to leave.");
             sendMessage(String.format("%n"));
             askForUsername();
