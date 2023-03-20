@@ -44,7 +44,7 @@ ChatServer zum Bestellen von Essen. Die Nutzer können interaktiv Essen bestelle
 - Sinvolle Struktur
 - Funktionen beachten (fast) alle Eventualitäten
   
-  Bsp: [`removeCartItems()`](/src/backend/Server.java#:~:text=removeCartItems) überprüft bei jedem Item, ob es überhaupt in der Liste existiert, um Exceptions zu vermeiden und um klar sagen zu können, welche Items denn wirklich entfernt wurden
+  Bsp: [`removeCartItems()`](/src/backend/Server.java#L93) überprüft bei jedem Item, ob es überhaupt in der Liste existiert, um Exceptions zu vermeiden und um klar sagen zu können, welche Items denn wirklich entfernt wurden
 
 - Code-Dopplungen wurden vermieden, dafür wurden viele Funktionen verwendet
 - Helfer-Funktionen(Wrapper-Funktionen) zur Vereinfachung der Schnittstellen
