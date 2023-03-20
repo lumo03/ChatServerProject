@@ -32,7 +32,7 @@ public class Server implements Runnable {
         connections = new ArrayList<>();
         shouldRun = true;
         shoppingCart = new ArrayList<>();
-        chatState = ChatState.CHATTING;
+        setChatState(ChatState.CHATTING);
         orderParticipants = new ArrayList<>();
         usernames = new ArrayList<>();
     }
@@ -216,7 +216,7 @@ public class Server implements Runnable {
     public void startOrder(ConnectionHandler user) {
         new Thread(() -> {
             broadcast(user, Operation.CMD_REQUEST_ORDER);
-            chatState = ChatState.WAITING_FOR_USERS_TO_JOIN_ORDER;
+            setChatState(ChatState.WAITING_FOR_USERS_TO_JOIN_ORDER);
 
             /*
             try {
@@ -227,7 +227,7 @@ public class Server implements Runnable {
             */
 
             broadcast(user, Operation.START_ORDER);
-            chatState = ChatState.TAKING_THE_ORDER;
+            setChatState(ChatState.TAKING_THE_ORDER);
 
             try {
                 Thread.sleep(TAKING_THE_ORDER_TIME);
@@ -236,7 +236,7 @@ public class Server implements Runnable {
             }
 
             broadcast(user, Operation.ANNOUNCE_DELIVERY_STARTED);
-            chatState = ChatState.DELIVERY;
+            setChatState(ChatState.DELIVERY);
 
             try {
                 Thread.sleep(DELIVERY_TIME);
@@ -245,7 +245,7 @@ public class Server implements Runnable {
             }
 
             broadcast(user, Operation.ANNOUNCE_DELIVERY_FINISHED);
-            chatState = ChatState.CHATTING;
+            setChatState(ChatState.CHATTING);
         }).start();
     }
 
