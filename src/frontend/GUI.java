@@ -13,6 +13,7 @@ public class GUI extends JFrame {
     public static final int PORT = 10666;
     private final BufferedReader in;
     private final PrintWriter out;
+    private StringBuilder serverOutput;
     private Socket client;
     private JPanel panel1;
     private JPanel chatP;
@@ -21,6 +22,10 @@ public class GUI extends JFrame {
     private JPanel inputP;
     private JTextField inputF;
     private JButton inputB;
+    private JScrollPane serverOutputS;
+
+    private final String fixedHeadlineContent = "GUI";
+    private String headlineContent;
 
     public GUI() {
         setSize(500, 500);
@@ -29,17 +34,23 @@ public class GUI extends JFrame {
         add(panel1);
         setVisible(true);
 
-        inputF.requestFocus();
-
         getRootPane().setDefaultButton(inputB);
 
         inputF.setEnabled(false);
         inputB.setEnabled(false);
+
+        serverOutput = new StringBuilder();
+
+        serverOutputT.append(String.format("%n%n%n"));
         inputB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (inputF.getText().length() == 0) {
+                    return;
+                }
                 String input = inputF.getText();
-                System.out.println(input);
+                // System.out.println(input);
+                out.println(input);
                 inputF.setText("");
                 inputF.requestFocus();
             }
@@ -61,7 +72,25 @@ public class GUI extends JFrame {
                 String message;
                 try {
                     while ((message = in.readLine()) != null) {
-                        serverOutputT.append(String.format("%s%n", message));
+                        // remove the last 3 newlines, append the new message and add 3 newlines
+                        serverOutput.append(String.format("%s%n", message));
+                        serverOutputT.setText(String.format("%s%n%n%n", serverOutput.toString()));
+                        serverOutputS.getVerticalScrollBar().setValue(serverOutputS.getVerticalScrollBar().getMaximum());
+
+                        if (message.startsWith("You (")) {
+                            String username = message.substring(message.indexOf("(") + 1, message.indexOf(")"));
+
+                            if (username.length() > 0) {
+                                headlineL.setText(fixedHeadlineContent + " - " + username);
+                            }
+                        } else if (message.startsWith("Your username was successfully set to '")) {
+                            int indexOfOpenQuote = message.indexOf("'");
+                            String username = message.substring(indexOfOpenQuote + 1, message.indexOf("'", indexOfOpenQuote + 1));
+
+                            if (username.length() > 0) {
+                                headlineL.setText(fixedHeadlineContent + " - " + username);
+                            }
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -70,6 +99,7 @@ public class GUI extends JFrame {
 
             inputF.setEnabled(true);
             inputB.setEnabled(true);
+            inputF.requestFocus();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
