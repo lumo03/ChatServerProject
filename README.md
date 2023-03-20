@@ -1,6 +1,6 @@
 # ChatServerProject (DE)
 
-ChatServer zum Bestellen von Essen. Die Nutzer können interaktiv Essen bestellen und sich dabei austauschen.
+ChatServer zum Bestellen von Essen. Die Nutzer können interaktiv Essen bestellen und sich dabei austauschen. Siehe [Besondere Merkmale](#besondere-merkmale).
 
 
 ## Setup
