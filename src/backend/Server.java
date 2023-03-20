@@ -125,9 +125,9 @@ public class Server implements Runnable {
             retMsg = "You left the chat.";
         } else if (msgType == Operation.CMD_RENAME) {
             if (optionalData.size() > 0) {
-                sysMsg = String.format("%s set their username to '%s'.", clientH.getUsername(), optionalData.get(0));
-                pubMsg = String.format("%s set their username to '%s'.", clientH.getUsername(), optionalData.get(0));
-                retMsg = String.format("Your username was successfully set to '%s'.", optionalData.get(0));
+                sysMsg = String.format("%s set their username to '%s'.", optionalData.get(0), optionalData.get(1));
+                pubMsg = String.format("%s set their username to '%s'.",  optionalData.get(0), optionalData.get(1));
+                retMsg = String.format("Your username was successfully set to '%s'.", optionalData.get(1));
             } else {
                 sysMsg = String.format("%s changed their username.", clientH.getUsername());
                 pubMsg = String.format("%s changed their username.", clientH.getUsername());

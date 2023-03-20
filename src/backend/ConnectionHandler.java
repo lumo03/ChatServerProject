@@ -109,9 +109,10 @@ class ConnectionHandler implements Runnable {
             server.reportError(this, Operation.CMD_RENAME, List.of("Username is already taken."));
             return false;
         } else {
+            String oldUsername = username;
             username = newUsername;
             server.addUsername(newUsername);
-            server.broadcast(this, Operation.CMD_RENAME, List.of(username));
+            server.broadcast(this, Operation.CMD_RENAME, List.of(oldUsername, username));
             return true;
         }
     }
