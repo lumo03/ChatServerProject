@@ -138,16 +138,16 @@ public class Server implements Runnable {
         } else if (msgType == Operation.CMD_ADD_TO_ORDER) {
             shoppingCart.addAll(optionalData);
             String items = Utils.joinWithComma(optionalData);
-            sysMsg = String.format("%s ordered: %s", clientH.getUsername(), items);
-            pubMsg = String.format("%s ordered: %s", clientH.getUsername(), items);
+            sysMsg = String.format("%s ordered: %s%nShopping Cart: %s", clientH.getUsername(), items, Utils.formatOrder(shoppingCart));
+            pubMsg = String.format("%s ordered: %s%nShopping Cart: %s", clientH.getUsername(), items, Utils.formatOrder(shoppingCart));
             retMsg = String.format("You ordered: %s%nShopping Cart: %s", items, Utils.formatOrder(shoppingCart));
         } else if (msgType == Operation.CMD_REQUEST_ORDER) {
             sysMsg = String.format("%s requested an order.", clientH.getUsername());
-            pubMsg = String.format("%s requested an order. Enter the command \"/join\" to join the order.", clientH.getUsername());
-            retMsg = "Your order was requested. Waiting for others to join...";
+            pubMsg = String.format("%s requested an order. "/*+"Enter the command \"/join\" to join the order."*/, clientH.getUsername());
+            retMsg = "Your order was requested. "/*+"Waiting for others to join..."*/;
         } else if (msgType == Operation.START_ORDER) {
             sysMsg = "The order was started. Waiting for order.";
-            pubMsg = "The order was started. You can now order with \\\"/add [item1] [item2]\\\".";
+            pubMsg = "The order was started. You can now order with \"/add [item1] [item2]\".";
             retMsg = "Your order was started. You can now order with \"/add [item1] [item2]\".";
         } else if (msgType == Operation.ANNOUNCE_DELIVERY_STARTED) {
             sysMsg = String.format("The delivery has started.%nOrder: %s%nDelivery time: %d seconds.", shoppingCart, DELIVERY_TIME / 1000);
@@ -201,11 +201,13 @@ public class Server implements Runnable {
             broadcast(user, Operation.CMD_REQUEST_ORDER);
             chatState = ChatState.WAITING_FOR_USERS_TO_JOIN_ORDER;
 
+            /*
             try {
                 Thread.sleep(WAITING_FOR_USERS_TO_JOIN_ORDER_TIME);
             } catch (InterruptedException e) {
                 // ignore
             }
+            */
 
             broadcast(user, Operation.START_ORDER);
             chatState = ChatState.TAKING_THE_ORDER;
