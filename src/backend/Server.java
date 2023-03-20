@@ -90,6 +90,18 @@ public class Server implements Runnable {
         usernames.remove(username);
     }
 
+    public List<String> removeCartItems(List<String> items) {
+        // TODO: report error when item is not in cart
+        List<String> actuallyRemoved = new ArrayList<>();
+        for (String item : items) {
+            if (shoppingCart.contains(item)) {
+                shoppingCart.remove(item);
+                actuallyRemoved.add(item);
+            }
+        }
+        return actuallyRemoved;
+    }
+
     @Deprecated
     public void broadcast(String message) {
         for (ConnectionHandler ch : connections) {
@@ -141,6 +153,11 @@ public class Server implements Runnable {
             sysMsg = String.format("%s ordered: %s%nShopping Cart: %s", clientH.getUsername(), items, Utils.formatOrder(shoppingCart));
             pubMsg = String.format("%s ordered: %s%nShopping Cart: %s", clientH.getUsername(), items, Utils.formatOrder(shoppingCart));
             retMsg = String.format("You ordered: %s%nShopping Cart: %s", items, Utils.formatOrder(shoppingCart));
+        } else if (msgType == Operation.CMD_REMOVE_FROM_ORDER) {
+            String items = Utils.formatOrder(removeCartItems(optionalData));
+            sysMsg = String.format("%s removed: %s%nShopping Cart: %s", clientH.getUsername(), items, Utils.formatOrder(shoppingCart));
+            pubMsg = String.format("%s removed: %s%nShopping Cart: %s", clientH.getUsername(), items, Utils.formatOrder(shoppingCart));
+            retMsg = String.format("You removed: %s%nShopping Cart: %s", items, Utils.formatOrder(shoppingCart));
         } else if (msgType == Operation.CMD_REQUEST_ORDER) {
             sysMsg = String.format("%s requested an order.", clientH.getUsername());
             pubMsg = String.format("%s requested an order. "/*+"Enter the command \"/join\" to join the order."*/, clientH.getUsername());

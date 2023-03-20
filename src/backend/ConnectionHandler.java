@@ -59,12 +59,25 @@ class ConnectionHandler implements Runnable {
                 } else if (message.toUpperCase().startsWith("/ADD ")) {
                     if (server.getChatState() == ChatState.TAKING_THE_ORDER) {
                         List<String> orderSplit = Arrays.stream(message.toUpperCase().split(" "))
-                                .filter(w -> server.isOrderItem(w))
+                                .filter(server::isOrderItem)
                                 .collect(Collectors.toList());
                         if (orderSplit.size() > 0) {
                             server.broadcast(this, Operation.CMD_ADD_TO_ORDER, orderSplit);
                         } else {
                             server.reportError(this, Operation.CMD_ADD_TO_ORDER);
+                        }
+                    } else {
+                        server.reportError(this, Operation.CMD_ADD_TO_ORDER, List.of("No order was started."));
+                    }
+                } else if (message.toUpperCase().startsWith("/REMOVE ")) {
+                    if (server.getChatState() == ChatState.TAKING_THE_ORDER) {
+                        List<String> orderSplit = Arrays.stream(message.toUpperCase().split(" "))
+                                .filter(server::isOrderItem)
+                                .collect(Collectors.toList());
+                        if (orderSplit.size() > 0) {
+                            server.broadcast(this, Operation.CMD_REMOVE_FROM_ORDER, orderSplit);
+                        } else {
+                            server.reportError(this, Operation.CMD_REMOVE_FROM_ORDER);
                         }
                     } else {
                         server.reportError(this, Operation.CMD_ADD_TO_ORDER, List.of("No order was started."));

@@ -1,7 +1,7 @@
 package backend.types;
 
 public enum Operation {
-    TEXT, CMD_RENAME, CMD_QUIT, CMD_JOIN, CMD_ADD_TO_ORDER, CMD_REQUEST_ORDER, START_ORDER, ANNOUNCE_DELIVERY_STARTED, ANNOUNCE_DELIVERY_FINISHED;
+    TEXT, CMD_RENAME, CMD_QUIT, CMD_JOIN, CMD_ADD_TO_ORDER, CMD_REQUEST_ORDER, START_ORDER, ANNOUNCE_DELIVERY_STARTED, ANNOUNCE_DELIVERY_FINISHED, CMD_REMOVE_FROM_ORDER;
 
     @Override
     public String toString() {
@@ -15,7 +15,9 @@ public enum Operation {
             case CMD_JOIN:
                 return "Join";
             case CMD_ADD_TO_ORDER:
-                return "Order";
+                return "Add to Order";
+            case CMD_REMOVE_FROM_ORDER:
+                return "Remove from Order";
             case CMD_REQUEST_ORDER:
                 return "Request Order";
             case START_ORDER:
