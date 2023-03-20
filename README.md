@@ -10,7 +10,7 @@ ChatServer zum Bestellen von Essen. Die Nutzer können interaktiv Essen bestelle
       ```bash
       git clone https://github.com/lumo03/ChatServerProject.git
       ```
-2. Projekt in IDE öffnen:
+1. Projekt in IDE öffnen:
       - Intellij (wenn CLI installiert): 
            ```bash
            idea ChatServerProject
@@ -19,7 +19,9 @@ ChatServer zum Bestellen von Essen. Die Nutzer können interaktiv Essen bestelle
            ```bash
            code ChatServerProject
            ```
-3. Setup JDK (OpenJDK 19)
+1. Setup JDK (OpenJDK 19)
+1. `main()`-Methode in `Main.java`ausführen (startet sowohl Server als auch Client) 
+   
 
 
 ## Besondere Merkmale 
@@ -35,7 +37,7 @@ ChatServer zum Bestellen von Essen. Die Nutzer können interaktiv Essen bestelle
   - `/quit` verändert das Verhalten der GUI
   - Benutzername wird oben im Titel angezeigt
 - Verwendung komplexer Programmierpraktika, welche über das im Unterricht gelernte hinausgehen:
-  - Lambda - Funktionen in Kombination mit funktionalen Interfaces
+  - Lambda-Funktionen in Kombination mit funktionalen Interfaces
   - ENUM Types ([`ChatState`](/src/backend/types/ChatState.java), [`Operation`](/src/backend/types/Operation.java))
   - ThreadScheduling mithilfe eines ThreadPools
   - Stream API
@@ -47,7 +49,7 @@ ChatServer zum Bestellen von Essen. Die Nutzer können interaktiv Essen bestelle
   Bsp: [`removeCartItems()`](/src/backend/Server.java#L93) überprüft bei jedem Item, ob es überhaupt in der Liste existiert, um Exceptions zu vermeiden und um klar sagen zu können, welche Items denn wirklich entfernt wurden
 
 - Code-Dopplungen wurden vermieden, dafür wurden viele Funktionen verwendet
-- Helfer-Funktionen(Wrapper-Funktionen) zur Vereinfachung der Schnittstellen
+- Helfer-Funktionen (Wrapper-Funktionen) zur Vereinfachung der Schnittstellen
 
 
 ## Zusätzliche Informationen
