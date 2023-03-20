@@ -96,6 +96,10 @@ class ConnectionHandler implements Runnable {
         out.println(message);
     }
 
+    public void sendBlankLine() {
+        out.println();
+    }
+
     public String getUsername() {
         return username;
     }

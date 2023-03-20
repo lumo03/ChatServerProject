@@ -18,9 +18,9 @@ public class Server implements Runnable {
     private final ArrayList<ConnectionHandler> connections;
     private final List<String> shoppingCart;
     private final List<ConnectionHandler> orderParticipants;
-    private final int WAITING_FOR_USERS_TO_JOIN_ORDER_TIME = 5000;
-    private final int TAKING_THE_ORDER_TIME = 20000;
-    private final int DELIVERY_TIME = 12000;
+    private final int WAITING_FOR_USERS_TO_JOIN_ORDER_TIME = 5_000;
+    private final int TAKING_THE_ORDER_TIME = 60_000;
+    private final int DELIVERY_TIME = 12_000;
     private final List<String> usernames;
     private ServerSocket server;
     private boolean shouldRun;
@@ -163,13 +163,18 @@ public class Server implements Runnable {
             pubMsg = String.format("%s requested an order. "/*+"Enter the command \"/join\" to join the order."*/, clientH.getUsername());
             retMsg = "Your order was requested. "/*+"Waiting for others to join..."*/;
         } else if (msgType == Operation.START_ORDER) {
-            sysMsg = "The order was started. Waiting for order.";
+            sysMsg = String.format("The order was started. Waiting for order.%n" +
+                    "Order time: %d seconds", TAKING_THE_ORDER_TIME / 1000);
             pubMsg = String.format("The order was started.%n" +
                     "You can now add items to the order with \"/add [item1] [item2]\"%n" +
-                    "or remove items with \"/remove [item1] [item2]\".%n");
+                    "or remove items with \"/remove [item1] [item2]\".%n" +
+                    "Available items: %s%n" +
+                    "You have %d seconds to order.", Utils.formatOrder(ORDER_ITEMS), TAKING_THE_ORDER_TIME / 1000);
             retMsg = String.format("Your order was started.%n" +
                     "You can now order with \"/add [item1] [item2]\"%n" +
-                    "or remove items with \"/remove [item1] [item2]\".%n");
+                    "or remove items with \"/remove [item1] [item2]\".%n" +
+                    "Available items: %s%n" +
+                    "You have %d seconds to order.", Utils.formatOrder(ORDER_ITEMS), TAKING_THE_ORDER_TIME / 1000);
         } else if (msgType == Operation.ANNOUNCE_DELIVERY_STARTED) {
             sysMsg = String.format("The delivery has started.%nOrder: %s%nDelivery time: %d seconds.", shoppingCart, DELIVERY_TIME / 1000);
             pubMsg = String.format("The delivery has started.%nThe order is: %s.%nIt should arrive in around %d seconds.", Utils.formatOrder(shoppingCart), DELIVERY_TIME / 1000);
@@ -198,6 +203,19 @@ public class Server implements Runnable {
 
     public void broadcast(ConnectionHandler clientH, Operation msgType) {
         broadcast(clientH, msgType, List.of());
+    }
+
+    public void broadcastBlankLine() {
+        for (ConnectionHandler ch : connections) {
+            if (ch != null) {
+                ch.sendBlankLine();
+            }
+        }
+    }
+
+    public void broadcastWithBlankLine(String message) {
+        broadcast(message);
+        broadcastBlankLine();
     }
 
     public void reportError(ConnectionHandler user, Operation operation, List<String> optionalData) {
@@ -233,20 +251,14 @@ public class Server implements Runnable {
             broadcast(user, Operation.START_ORDER);
             setChatState(ChatState.TAKING_THE_ORDER);
 
-            try {
-                Thread.sleep(TAKING_THE_ORDER_TIME);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+            new OrderTimer(TAKING_THE_ORDER_TIME / 1000, 5, this::broadcastWithBlankLine).start();
+            broadcastBlankLine();
 
             broadcast(user, Operation.ANNOUNCE_DELIVERY_STARTED);
             setChatState(ChatState.DELIVERY);
 
-            try {
-                Thread.sleep(DELIVERY_TIME);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+            new OrderTimer(DELIVERY_TIME / 1000, 4, this::broadcastWithBlankLine).start();
+            broadcastBlankLine();
 
             broadcast(user, Operation.ANNOUNCE_DELIVERY_FINISHED);
             setChatState(ChatState.CHATTING);
