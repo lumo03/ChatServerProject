@@ -20,7 +20,7 @@ ChatServer zum Bestellen von Essen. Die Nutzer können interaktiv Essen bestelle
            code ChatServerProject
            ```
 1. Setup JDK (OpenJDK 19)
-1. `main()`-Methode in `Main.java` ausführen (startet sowohl Server als auch Client) 
+1. [`main()`](/src/Main.java#L19)-Methode in [`Main.java`](/src/Main.java) ausführen (startet sowohl Server als auch Client) 
    
 
 
