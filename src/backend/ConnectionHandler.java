@@ -31,7 +31,7 @@ class ConnectionHandler implements Runnable {
         try {
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             out = new PrintWriter(client.getOutputStream(), true);
-            sendMessage("Welcome to the Order-Chat-backend.Server!");
+            sendMessage("Welcome to the Order-Chat-Server!");
             sendMessage("Type `/quit` to leave.");
             sendMessage(String.format("%n"));
             askForUsername();
@@ -108,6 +108,12 @@ class ConnectionHandler implements Runnable {
                 wantedUsername = in.readLine();
             } catch (IOException e) {
                 server.reportError(this, Operation.CMD_RENAME, List.of("Could not read username from input stream."));
+            }
+
+            if (wantedUsername.toUpperCase().startsWith("/QUIT")) {
+                server.broadcast(this, Operation.CMD_QUIT, List.of(username));
+                shutdown();
+                return;
             }
 
             isValid = !server.isUsernameTaken(wantedUsername);

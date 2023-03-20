@@ -11,7 +11,7 @@ import java.net.Socket;
 
 public class GUI extends JFrame {
     public static final int PORT = 10666;
-    private final String fixedHeadlineContent = "GUI";
+    private final String fixedHeadlineContent = "OrderGUI";
     private BufferedReader in;
     private PrintWriter out;
     private StringBuilder serverOutput;
@@ -34,6 +34,8 @@ public class GUI extends JFrame {
         setLocationRelativeTo(null);
         add(panel1);
         setVisible(true);
+
+        headlineL.setText(fixedHeadlineContent);
 
         getRootPane().setDefaultButton(inputB);
         inputB.addActionListener(new ActionListener() {
