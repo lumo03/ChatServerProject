@@ -19,7 +19,7 @@ public class Server implements Runnable {
     private final List<String> shoppingCart;
     private final List<ConnectionHandler> orderParticipants;
     private final int WAITING_FOR_USERS_TO_JOIN_ORDER_TIME = 5000;
-    private final int TAKING_THE_ORDER_TIME = 10000;
+    private final int TAKING_THE_ORDER_TIME = 20000;
     private final int DELIVERY_TIME = 12000;
     private final List<String> usernames;
     private ServerSocket server;
@@ -164,8 +164,12 @@ public class Server implements Runnable {
             retMsg = "Your order was requested. "/*+"Waiting for others to join..."*/;
         } else if (msgType == Operation.START_ORDER) {
             sysMsg = "The order was started. Waiting for order.";
-            pubMsg = "The order was started. You can now order with \"/add [item1] [item2]\".";
-            retMsg = "Your order was started. You can now order with \"/add [item1] [item2]\".";
+            pubMsg = String.format("The order was started.%n" +
+                    "You can now add items to the order with \"/add [item1] [item2]\"%n" +
+                    "or remove items with \"/remove [item1] [item2]\".%n");
+            retMsg = String.format("Your order was started.%n" +
+                    "You can now order with \"/add [item1] [item2]\"%n" +
+                    "or remove items with \"/remove [item1] [item2]\".%n");
         } else if (msgType == Operation.ANNOUNCE_DELIVERY_STARTED) {
             sysMsg = String.format("The delivery has started.%nOrder: %s%nDelivery time: %d seconds.", shoppingCart, DELIVERY_TIME / 1000);
             pubMsg = String.format("The delivery has started.%nThe order is: %s.%nIt should arrive in around %d seconds.", Utils.formatOrder(shoppingCart), DELIVERY_TIME / 1000);
